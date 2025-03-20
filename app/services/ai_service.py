@@ -102,16 +102,42 @@ def summarize_webpage(openai_client, url: str) -> str:
     try:
         logger.info(f"Using OpenAI web search tool to summarize: {url}")
         
-        # Use the web search tool to fetch and summarize content
+        # Enhanced prompting for web search
+        system_prompt = """You are a helpful assistant with web search capability. 
+When given a URL, you should:
+1. Search for the webpage content
+2. Summarize the main points and key information
+3. Present a clear, comprehensive but concise summary
+4. Include the most important details, findings, or conclusions
+5. Format the information in an easy-to-read way"""
+
+        user_prompt = f"""Please search for and provide a detailed summary of this webpage: {url}
+        
+I want to understand the key points, main findings, and important details from this page without having to read the entire content.
+Please be thorough but concise in your summary."""
+        
+        # More explicit search instruction
+        tools = [
+            {
+                "type": "web_search"
+            }
+        ]
+        
+        # Create the API call with detailed debugging
+        logger.info("Sending web search request to OpenAI")
         completion = openai_client.chat.completions.create(
             model="gpt-4o",  # Use a model that supports web search
             messages=[
-                {"role": "system", "content": "You are a helpful assistant that summarizes web content accurately. Provide a comprehensive but concise summary of the webpage."},
-                {"role": "user", "content": f"Please search for and summarize this webpage: {url}"}
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
             ],
-            tools=[{"type": "web_search"}]  # Enable web search tool
+            tools=tools,
+            tool_choice="auto"  # Explicitly tell the model to use tools when needed
         )
         
+        logger.info("Received response from OpenAI web search")
+        
+        # Get the response content
         return completion.choices[0].message.content
     except Exception as e:
         logger.error(f"Error using OpenAI web search: {e}")

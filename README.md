@@ -114,13 +114,13 @@ If you're experiencing issues with these features, check your deployment platfor
 
 ### Basic Interaction
 
-Mention the bot with `@WDAI AI Bot` in any channel it's invited to, or send it a direct message.
+Mention the bot with `@Bot Name` in any channel it's invited to, or send it a direct message.
 
 ### Image Analysis
 
 Attach an image to your message to have the bot analyze it:
 ```
-@WDAI AI Bot What's in this image?
+@Bot Name What's in this image?
 [image attachment]
 ```
 
@@ -128,18 +128,18 @@ Attach an image to your message to have the bot analyze it:
 
 Ask the bot to create images with DALL-E 3:
 ```
-@WDAI AI Bot generate an image of a cat riding a bicycle
+@Bot Name generate an image of a cat riding a bicycle
 ```
 or
 ```
-@WDAI AI Bot create a funny meme about programming
+@Bot Name create a funny meme about programming
 ```
 
 ### CSV Analysis
 
 Attach a CSV file to have the bot analyze the data:
 ```
-@WDAI AI Bot analyze this data please
+@Bot Name analyze this data please
 [CSV attachment]
 ```
 
@@ -147,18 +147,35 @@ Attach a CSV file to have the bot analyze the data:
 
 Share a PDF document for content extraction and summarization:
 ```
-@WDAI AI Bot extract the key points from this document
+@Bot Name extract the key points from this document
 [PDF attachment]
 ```
 
 ### Web Page Summarization
 
-Ask the bot to summarize content from a webpage using OpenAI's web search capability:
+Ask the bot to summarize content from a webpage by including a URL in your message. The bot will intelligently detect when you want information about a URL:
+
 ```
-@WDAI AI Bot summarize this webpage: https://example.com/article
+@Bot Name summarize this webpage: https://example.com/article
+```
+
+You can use many variations - the bot is flexible and will understand most requests containing a URL:
+
+```
+@Bot Name what's this website about? https://example.com
+@Bot Name https://example.com/article tell me about this
+@Bot Name give me info on https://example.com/research/paper.pdf
+```
+
+You can even simply share a URL with minimal text, and the bot will often understand you're requesting information about it:
+
+```
+@Bot Name https://example.com/article
 ```
 
 This feature uses OpenAI's web search tool to find and summarize web content directly, without requiring the bot to access the web page itself.
+
+**Note**: Make sure to include the complete URL including the `https://` prefix.
 
 ### Thread Conversations
 
@@ -203,18 +220,6 @@ pandas
 pillow
 ```
 
-## Troubleshooting
-
-- **Bot not responding**: Check the application logs for errors
-- **File uploads not working**: Ensure the bot has the `files:read` permission
-- **Image generation fails**: Verify the bot has the `files:write` permission and check DALL-E API usage limits
-- **Error with OpenAI API**: Verify your API key and usage limits
-- **Bot responding in wrong channels**: Check if ALLOWED_CHANNEL is set correctly
-- **Web summarization not working**: This feature uses OpenAI's web search tool, which requires:
-  1. An OpenAI API key with access to web search capability
-  2. Proper formatting of your request (use "summarize this webpage: https://...")
-  3. If you receive errors, check if your OpenAI plan supports the web search tool
-
 ## Limitations
 
 - The bot can process files up to 25MB (Slack file size limit)
@@ -222,6 +227,7 @@ pillow
 - CSV parsing works best with well-formatted data
 - The bot may have slower response times when processing large files
 - Image generation follows OpenAI's content policy and may reject certain prompts
+- The web search tool from OpenAI may have limitations on certain websites or content types
 
 ## License
 

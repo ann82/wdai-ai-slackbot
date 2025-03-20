@@ -1,5 +1,6 @@
 import os
 from typing import List, Dict, Any, Optional, Tuple
+import re
 
 from app.config import logger, MAX_THREAD_HISTORY, SLACK_BOT_TOKEN
 from app.services.file_service import process_file_attachment
@@ -142,26 +143,47 @@ def is_web_summarization_request(message_text: str) -> Tuple[bool, Optional[str]
     """Determine if a message is requesting web summarization and extract the URL."""
     message_text = message_text.lower()
     
-    # Check for various forms of the request
-    summarize_keywords = ["summarize", "summary", "summarization", "summarise"]
-    web_keywords = ["webpage", "website", "web", "page", "url", "link", "site"]
+    # Extract any URLs from the message
+    url_pattern = r'https?://[^\s]+'
+    urls = re.findall(url_pattern, message_text)
     
+    if not urls:
+        return False, None
+    
+    # If we have a URL, check for some context
+    url = urls[0]
+    logger.info(f"Found URL in message: {url}")
+    
+    # Check for various forms of the request
+    summarize_keywords = ["summarize", "summary", "summarization", "summarise", "about", "info", "information", "details"]
+    web_keywords = ["webpage", "website", "web", "page", "url", "link", "site", "article", "post", "content"]
+    question_indicators = ["what", "tell me", "show me", "explain", "describe"]
+    
+    # Either explicit summarization request OR just a URL with minimal context
     has_summarize_keyword = any(keyword in message_text for keyword in summarize_keywords)
     has_web_keyword = any(keyword in message_text for keyword in web_keywords)
-    has_url = "http://" in message_text or "https://" in message_text
+    has_question = any(indicator in message_text for indicator in question_indicators)
     
-    # If either the message mentions summarizing and has a URL, or it mentions summarizing a web-related term and has a URL
-    if (has_summarize_keyword and has_url) or (has_summarize_keyword and has_web_keyword and has_url):
-        # Extract URL - find the first URL in the message
-        words = message_text.split()
-        url = next((word for word in words if word.startswith(("http://", "https://"))), None)
+    # More permissive conditions:
+    # 1. Explicit request for summarization
+    # 2. URL with some context about websites or pages
+    # 3. URL with a question indicator
+    # 4. Just a URL with very little other text (likely wants information about it)
+    if (has_summarize_keyword or 
+        has_web_keyword or 
+        has_question or
+        (len(message_text.split()) < 8 and "http" in message_text)):  # Short message with URL
         
-        if url:
-            # Clean the URL if needed (remove trailing punctuation)
-            if url[-1] in ['.', ',', ':', ';', ')', ']', '}']:
-                url = url[:-1]
-            return True, url
+        logger.info(f"Treating as web summarization request: summarize={has_summarize_keyword}, web={has_web_keyword}, question={has_question}")
+        
+        # Clean the URL if needed (remove trailing punctuation)
+        if url[-1] in ['.', ',', ':', ';', ')', ']', '}']:
+            url = url[:-1]
+        
+        return True, url
     
+    # Not enough context to determine it's a summarization request
+    logger.info("URL found but not treating as summarization request due to lack of context")
     return False, None
 
 
