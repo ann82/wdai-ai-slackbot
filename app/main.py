@@ -27,7 +27,8 @@ async def startup_event():
     # Initialize Slack client
     app.state.slack_client = WebClient(token=SLACK_BOT_TOKEN)
     
-    # Initialize OpenAI client
+    # Initialize OpenAI client with default configuration
+    # This client will be used for all OpenAI API calls including web search
     app.state.openai_client = OpenAI(api_key=OPENAI_API_KEY)
     
     # Get bot user ID

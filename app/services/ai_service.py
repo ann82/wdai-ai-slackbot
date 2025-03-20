@@ -98,42 +98,21 @@ def transcribe_audio(openai_client, audio_data: bytes, file_format: str) -> str:
 
 
 def summarize_webpage(openai_client, url: str) -> str:
-    """Fetch and summarize a webpage."""
+    """Summarize a webpage using OpenAI's web search tool."""
     try:
-        import requests
+        logger.info(f"Using OpenAI web search tool to summarize: {url}")
         
-        # Log attempt
-        logger.info(f"Attempting to fetch webpage: {url}")
-        
-        # Fetch the webpage content
-        response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
-        response.raise_for_status()
-        
-        # Check if we actually got content
-        if not response.text:
-            return "The webpage appears to be empty or couldn't be properly accessed."
-            
-        logger.info(f"Successfully fetched webpage: {url} ({len(response.text)} bytes)")
-        
-        # Create a summary request to OpenAI
-        summary = openai_client.chat.completions.create(
-            model=DEFAULT_MODEL,
+        # Use the web search tool to fetch and summarize content
+        completion = openai_client.chat.completions.create(
+            model="gpt-4o",  # Use a model that supports web search
             messages=[
-                {"role": "system", "content": "You are a helpful assistant that summarizes web content."},
-                {"role": "user", "content": f"Summarize this webpage content in a concise way:\n\n{response.text[:50000]}"}
-            ]
+                {"role": "system", "content": "You are a helpful assistant that summarizes web content accurately. Provide a comprehensive but concise summary of the webpage."},
+                {"role": "user", "content": f"Please search for and summarize this webpage: {url}"}
+            ],
+            tools=[{"type": "web_search"}]  # Enable web search tool
         )
         
-        return summary.choices[0].message.content
-    except requests.exceptions.ConnectionError:
-        logger.error(f"Connection error when trying to access: {url}")
-        return "I couldn't connect to this website. The URL might be incorrect or the website might be down."
-    except requests.exceptions.Timeout:
-        logger.error(f"Timeout when trying to access: {url}")
-        return "The website took too long to respond. Please try again later or try a different website."
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Request error when trying to access {url}: {e}")
-        return f"I couldn't access this website. Error: {str(e)}"
+        return completion.choices[0].message.content
     except Exception as e:
-        logger.error(f"Unexpected error summarizing webpage {url}: {e}")
+        logger.error(f"Error using OpenAI web search: {e}")
         return f"I encountered an error when trying to summarize this webpage: {str(e)}"

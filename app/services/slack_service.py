@@ -142,12 +142,24 @@ def is_web_summarization_request(message_text: str) -> Tuple[bool, Optional[str]
     """Determine if a message is requesting web summarization and extract the URL."""
     message_text = message_text.lower()
     
-    if "summarize" in message_text and ("http://" in message_text or "https://" in message_text):
+    # Check for various forms of the request
+    summarize_keywords = ["summarize", "summary", "summarization", "summarise"]
+    web_keywords = ["webpage", "website", "web", "page", "url", "link", "site"]
+    
+    has_summarize_keyword = any(keyword in message_text for keyword in summarize_keywords)
+    has_web_keyword = any(keyword in message_text for keyword in web_keywords)
+    has_url = "http://" in message_text or "https://" in message_text
+    
+    # If either the message mentions summarizing and has a URL, or it mentions summarizing a web-related term and has a URL
+    if (has_summarize_keyword and has_url) or (has_summarize_keyword and has_web_keyword and has_url):
         # Extract URL - find the first URL in the message
         words = message_text.split()
         url = next((word for word in words if word.startswith(("http://", "https://"))), None)
         
         if url:
+            # Clean the URL if needed (remove trailing punctuation)
+            if url[-1] in ['.', ',', ':', ';', ')', ']', '}']:
+                url = url[:-1]
             return True, url
     
     return False, None

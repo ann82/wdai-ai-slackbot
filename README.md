@@ -88,10 +88,11 @@ A Slack bot that uses OpenAI's GPT-4o model to respond to messages, analyze imag
 
 For certain features to work properly, your deployment environment needs:
 
-- **Outbound Internet Access**: The web summarization feature requires the ability to make outbound HTTP requests. If your deployment environment restricts outbound internet access, this feature won't work.
 - **File Storage**: For processing image generation results, the bot needs temporary file storage access.
 
-If you're experiencing issues with these features, check your deployment platform's documentation about network policies and file system access.
+Note: The web summarization feature now uses OpenAI's web search tool, so it no longer requires the bot to have outbound internet access.
+
+If you're experiencing issues with these features, check your deployment platform's documentation about file system access.
 
 ### Slack Configuration for Deployed Bot
 
@@ -152,10 +153,12 @@ Share a PDF document for content extraction and summarization:
 
 ### Web Page Summarization
 
-Ask the bot to summarize content from a webpage:
+Ask the bot to summarize content from a webpage using OpenAI's web search capability:
 ```
 @WDAI AI Bot summarize this webpage: https://example.com/article
 ```
+
+This feature uses OpenAI's web search tool to find and summarize web content directly, without requiring the bot to access the web page itself.
 
 ### Thread Conversations
 
@@ -207,11 +210,10 @@ pillow
 - **Image generation fails**: Verify the bot has the `files:write` permission and check DALL-E API usage limits
 - **Error with OpenAI API**: Verify your API key and usage limits
 - **Bot responding in wrong channels**: Check if ALLOWED_CHANNEL is set correctly
-- **Web summarization not working**: This feature requires outbound internet access from your deployment environment. When deployed on Railway, check:
-  1. Verify logs for connection errors
-  2. Check Railway's documentation on network access policies
-  3. Test the feature locally first to confirm the code is working
-  4. You can alternatively use a web API gateway service if your hosting provider restricts outbound requests
+- **Web summarization not working**: This feature uses OpenAI's web search tool, which requires:
+  1. An OpenAI API key with access to web search capability
+  2. Proper formatting of your request (use "summarize this webpage: https://...")
+  3. If you receive errors, check if your OpenAI plan supports the web search tool
 
 ## Limitations
 

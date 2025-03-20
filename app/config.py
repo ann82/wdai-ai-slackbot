@@ -17,7 +17,7 @@ ALLOWED_CHANNEL = os.environ.get("ALLOWED_CHANNEL")
 logger.info(f"Bot configured to work only in channel: {ALLOWED_CHANNEL}")
 
 # Constants for the application
-DEFAULT_MODEL = "gpt-4o"
+DEFAULT_MODEL = "gpt-4o"  # This model supports web search capability
 IMAGE_MODEL = "dall-e-3"
 TTS_MODEL = "tts-1"
 WHISPER_MODEL = "whisper-1"
