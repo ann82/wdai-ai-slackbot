@@ -84,6 +84,15 @@ A Slack bot that uses OpenAI's GPT-4o model to respond to messages, analyze imag
    - Railway will automatically deploy your application when you push to your repository
    - You can also manually deploy from the Railway dashboard
 
+### Network Access Requirements
+
+For certain features to work properly, your deployment environment needs:
+
+- **Outbound Internet Access**: The web summarization feature requires the ability to make outbound HTTP requests. If your deployment environment restricts outbound internet access, this feature won't work.
+- **File Storage**: For processing image generation results, the bot needs temporary file storage access.
+
+If you're experiencing issues with these features, check your deployment platform's documentation about network policies and file system access.
+
 ### Slack Configuration for Deployed Bot
 
 1. After deployment, Railway will provide you with a URL for your application
@@ -198,6 +207,11 @@ pillow
 - **Image generation fails**: Verify the bot has the `files:write` permission and check DALL-E API usage limits
 - **Error with OpenAI API**: Verify your API key and usage limits
 - **Bot responding in wrong channels**: Check if ALLOWED_CHANNEL is set correctly
+- **Web summarization not working**: This feature requires outbound internet access from your deployment environment. When deployed on Railway, check:
+  1. Verify logs for connection errors
+  2. Check Railway's documentation on network access policies
+  3. Test the feature locally first to confirm the code is working
+  4. You can alternatively use a web API gateway service if your hosting provider restricts outbound requests
 
 ## Limitations
 

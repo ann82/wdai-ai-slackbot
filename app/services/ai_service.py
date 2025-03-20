@@ -102,9 +102,18 @@ def summarize_webpage(openai_client, url: str) -> str:
     try:
         import requests
         
+        # Log attempt
+        logger.info(f"Attempting to fetch webpage: {url}")
+        
         # Fetch the webpage content
-        response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
+        response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
         response.raise_for_status()
+        
+        # Check if we actually got content
+        if not response.text:
+            return "The webpage appears to be empty or couldn't be properly accessed."
+            
+        logger.info(f"Successfully fetched webpage: {url} ({len(response.text)} bytes)")
         
         # Create a summary request to OpenAI
         summary = openai_client.chat.completions.create(
@@ -116,6 +125,15 @@ def summarize_webpage(openai_client, url: str) -> str:
         )
         
         return summary.choices[0].message.content
+    except requests.exceptions.ConnectionError:
+        logger.error(f"Connection error when trying to access: {url}")
+        return "I couldn't connect to this website. The URL might be incorrect or the website might be down."
+    except requests.exceptions.Timeout:
+        logger.error(f"Timeout when trying to access: {url}")
+        return "The website took too long to respond. Please try again later or try a different website."
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Request error when trying to access {url}: {e}")
+        return f"I couldn't access this website. Error: {str(e)}"
     except Exception as e:
-        logger.error(f"Error summarizing webpage: {e}")
-        return f"Failed to summarize webpage: {str(e)}"
+        logger.error(f"Unexpected error summarizing webpage {url}: {e}")
+        return f"I encountered an error when trying to summarize this webpage: {str(e)}"
