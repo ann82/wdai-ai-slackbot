@@ -1,11 +1,13 @@
 import os
 import time
 from typing import List, Dict, Any, Optional
+import requests
 
 from app.config import (
     logger, DEFAULT_MODEL, IMAGE_MODEL, 
     IMAGE_SIZE, IMAGE_QUALITY, TTS_MODEL, TTS_VOICE, WHISPER_MODEL
 )
+from app.clients.slack_client import WebClient
 
 
 def get_openai_response(openai_client, messages: List[Dict[str, Any]]) -> str:
@@ -73,19 +75,26 @@ def convert_text_to_speech(openai_client, text: str) -> Optional[str]:
         return None
 
 
-def transcribe_audio(openai_client, audio_data: bytes, file_format: str) -> str:
-    """Transcribe audio using OpenAI's Whisper model."""
+def transcribe_audio(openai_client, audio_url: str, client: WebClient) -> str:
+    """Transcribe an audio file using OpenAI's Whisper model."""
     try:
-        # Save audio data to temporary file
-        temp_file = f"/tmp/audio_{int(time.time())}.{file_format}"
-        with open(temp_file, "wb") as f:
-            f.write(audio_data)
+        # Download the file from Slack
+        response = client.files_info(file=audio_url.split('-')[0])
+        download_url = response["file"]["url_private_download"]
         
-        # Transcribe audio
-        with open(temp_file, "rb") as f:
+        headers = {"Authorization": f"Bearer {client.token}"}
+        file_response = requests.get(download_url, headers=headers)
+        
+        # Save to a temporary file
+        temp_file = "temp_audio.mp3"
+        with open(temp_file, "wb") as f:
+            f.write(file_response.content)
+        
+        # Transcribe the audio
+        with open(temp_file, "rb") as audio_file:
             transcription = openai_client.audio.transcriptions.create(
-                model=WHISPER_MODEL,
-                file=f
+                file=audio_file,
+                model="whisper-1"
             )
         
         # Remove temporary file
@@ -95,50 +104,3 @@ def transcribe_audio(openai_client, audio_data: bytes, file_format: str) -> str:
     except Exception as e:
         logger.error(f"Error transcribing audio: {e}")
         return f"Audio transcription failed: {str(e)}"
-
-
-def summarize_webpage(openai_client, url: str) -> str:
-    """Summarize a webpage using OpenAI's web search tool."""
-    try:
-        logger.info(f"Using OpenAI web search tool to summarize: {url}")
-        
-        # Enhanced prompting for web search
-        system_prompt = """You are a helpful assistant with web search capability. 
-When given a URL, you should:
-1. Search for the webpage content
-2. Summarize the main points and key information
-3. Present a clear, comprehensive but concise summary
-4. Include the most important details, findings, or conclusions
-5. Format the information in an easy-to-read way"""
-
-        user_prompt = f"""Please search for and provide a detailed summary of this webpage: {url}
-        
-I want to understand the key points, main findings, and important details from this page without having to read the entire content.
-Please be thorough but concise in your summary."""
-        
-        # More explicit search instruction
-        tools = [
-            {
-                "type": "web_search"
-            }
-        ]
-        
-        # Create the API call with detailed debugging
-        logger.info("Sending web search request to OpenAI")
-        completion = openai_client.chat.completions.create(
-            model="gpt-4o",  # Use a model that supports web search
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            tools=tools,
-            tool_choice="auto"  # Explicitly tell the model to use tools when needed
-        )
-        
-        logger.info("Received response from OpenAI web search")
-        
-        # Get the response content
-        return completion.choices[0].message.content
-    except Exception as e:
-        logger.error(f"Error using OpenAI web search: {e}")
-        return f"I encountered an error when trying to summarize this webpage: {str(e)}"

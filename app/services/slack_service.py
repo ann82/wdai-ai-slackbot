@@ -139,54 +139,6 @@ def is_image_generation_request(message_text: str) -> Tuple[bool, Optional[str]]
     return False, None
 
 
-def is_web_summarization_request(message_text: str) -> Tuple[bool, Optional[str]]:
-    """Determine if a message is requesting web summarization and extract the URL."""
-    message_text = message_text.lower()
-    
-    # Extract any URLs from the message
-    url_pattern = r'https?://[^\s]+'
-    urls = re.findall(url_pattern, message_text)
-    
-    if not urls:
-        return False, None
-    
-    # If we have a URL, check for some context
-    url = urls[0]
-    logger.info(f"Found URL in message: {url}")
-    
-    # Check for various forms of the request
-    summarize_keywords = ["summarize", "summary", "summarization", "summarise", "about", "info", "information", "details"]
-    web_keywords = ["webpage", "website", "web", "page", "url", "link", "site", "article", "post", "content"]
-    question_indicators = ["what", "tell me", "show me", "explain", "describe"]
-    
-    # Either explicit summarization request OR just a URL with minimal context
-    has_summarize_keyword = any(keyword in message_text for keyword in summarize_keywords)
-    has_web_keyword = any(keyword in message_text for keyword in web_keywords)
-    has_question = any(indicator in message_text for indicator in question_indicators)
-    
-    # More permissive conditions:
-    # 1. Explicit request for summarization
-    # 2. URL with some context about websites or pages
-    # 3. URL with a question indicator
-    # 4. Just a URL with very little other text (likely wants information about it)
-    if (has_summarize_keyword or 
-        has_web_keyword or 
-        has_question or
-        (len(message_text.split()) < 8 and "http" in message_text)):  # Short message with URL
-        
-        logger.info(f"Treating as web summarization request: summarize={has_summarize_keyword}, web={has_web_keyword}, question={has_question}")
-        
-        # Clean the URL if needed (remove trailing punctuation)
-        if url[-1] in ['.', ',', ':', ';', ')', ']', '}']:
-            url = url[:-1]
-        
-        return True, url
-    
-    # Not enough context to determine it's a summarization request
-    logger.info("URL found but not treating as summarization request due to lack of context")
-    return False, None
-
-
 def upload_file_to_slack(slack_client, file_path: str, filename: str, title: str, 
                          initial_comment: str, channel: str, thread_ts: str) -> bool:
     """Upload a file to Slack."""

@@ -1,9 +1,9 @@
-# WDAI Slack LLM Bot
+# Talk to an LLM in Slack (Slackbot template from WDAI)
 
-A Slack bot that uses OpenAI's GPT-4o model to respond to messages, analyze images, process CSV data, and extract information from PDFs. Created for the purposes of enabling more AI experiments in-channel for Module 1 learners (#genai-projects-module1)
+A Slack bot that uses OpenAI's GPT-4o model to respond to messages, analyze images, process CSV data, and extract information from PDFs.  Originally created for the purposes of enabling more AI experiments in-channel for our Women Defining AI micro-learning program participants, this repo is a templatized version of our Slackbot implementation that is open so that others can build their own AI Slackbot
 
 ## Features
-
+This template relies on OpenAI APIs for LLM capabiltiies, but you can continue to expand on these capabilities by integrating other LLM and providers for various features.
 - **AI-Powered Conversations**: Responds to messages using OpenAI's GPT-4o model
 - **Conversation Memory**: Maintains context by tracking conversation history in threads
 - **Multi-Modal Capabilities**:
@@ -12,7 +12,6 @@ A Slack bot that uses OpenAI's GPT-4o model to respond to messages, analyze imag
   - **CSV Processing**: Analyzes tabular data shared in CSV format
   - **PDF Extraction**: Extracts and summarizes content from PDF documents
   - **Text File Handling**: Processes plain text files
-  - **Web Summarization**: Summarizes content from web pages when given a URL
 
 ## Setup and Deployment
 
@@ -90,8 +89,6 @@ For certain features to work properly, your deployment environment needs:
 
 - **File Storage**: For processing image generation results, the bot needs temporary file storage access.
 
-Note: The web summarization feature now uses OpenAI's web search tool, so it no longer requires the bot to have outbound internet access.
-
 If you're experiencing issues with these features, check your deployment platform's documentation about file system access.
 
 ### Slack Configuration for Deployed Bot
@@ -151,32 +148,6 @@ Share a PDF document for content extraction and summarization:
 [PDF attachment]
 ```
 
-### Web Page Summarization
-
-Ask the bot to summarize content from a webpage by including a URL in your message. The bot will intelligently detect when you want information about a URL:
-
-```
-@Bot Name summarize this webpage: https://example.com/article
-```
-
-You can use many variations - the bot is flexible and will understand most requests containing a URL:
-
-```
-@Bot Name what's this website about? https://example.com
-@Bot Name https://example.com/article tell me about this
-@Bot Name give me info on https://example.com/research/paper.pdf
-```
-
-You can even simply share a URL with minimal text, and the bot will often understand you're requesting information about it:
-
-```
-@Bot Name https://example.com/article
-```
-
-This feature uses OpenAI's web search tool to find and summarize web content directly, without requiring the bot to access the web page itself.
-
-**Note**: Make sure to include the complete URL including the `https://` prefix.
-
 ### Thread Conversations
 
 The bot maintains context in threads, so you can have a continuous conversation by replying in a thread.
@@ -227,7 +198,6 @@ pillow
 - CSV parsing works best with well-formatted data
 - The bot may have slower response times when processing large files
 - Image generation follows OpenAI's content policy and may reject certain prompts
-- The web search tool from OpenAI may have limitations on certain websites or content types
 
 ## License
 

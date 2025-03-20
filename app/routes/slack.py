@@ -6,10 +6,10 @@ from app.config import logger, ALLOWED_CHANNEL
 from app.utils.helpers import is_duplicate_message
 from app.services.slack_service import (
     get_thread_history, process_current_message, 
-    is_image_generation_request, is_web_summarization_request, 
+    is_image_generation_request,
     upload_file_to_slack
 )
-from app.services.ai_service import get_openai_response, generate_image, summarize_webpage
+from app.services.ai_service import get_openai_response, generate_image
 from app.services.file_service import download_image
 
 # Create router for Slack endpoints
@@ -160,31 +160,6 @@ async def slack_events(request: Request):
                 )
             
             return {"status": "ok_image_generation"}
-        
-        # Process web summarization request
-        is_web_request, url = is_web_summarization_request(message_text)
-        
-        if is_web_request and url:
-            logger.info(f"Summarizing webpage: {url}")
-            
-            # Send a processing message
-            slack_client.chat_postMessage(
-                channel=channel,
-                thread_ts=thread_ts,
-                text="Summarizing webpage, please wait..."
-            )
-            
-            # Summarize the webpage
-            summary = summarize_webpage(openai_client, url)
-            
-            # Post the summary to Slack
-            slack_client.chat_postMessage(
-                channel=channel,
-                thread_ts=thread_ts,
-                text=f"Here's the webpage summary:\n\n{summary}"
-            )
-            
-            return {"status": "ok_web_summarization"}
         
         # Process the current message for normal conversation
         current_message = process_current_message(slack_client, openai_client, event)
