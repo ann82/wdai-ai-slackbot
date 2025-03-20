@@ -1,0 +1,212 @@
+# WDAI Slack LLM Bot
+
+A Slack bot that uses OpenAI's GPT-4o model to respond to messages, analyze images, process CSV data, and extract information from PDFs. Created for the purposes of enabling more AI experiments in-channel for Module 1 learners (#genai-projects-module1)
+
+## Features
+
+- **AI-Powered Conversations**: Responds to messages using OpenAI's GPT-4o model
+- **Conversation Memory**: Maintains context by tracking conversation history in threads
+- **Multi-Modal Capabilities**:
+  - **Image Analysis**: Describes and answers questions about images
+  - **Image Generation**: Creates custom images using DALL-E 3 based on text prompts
+  - **CSV Processing**: Analyzes tabular data shared in CSV format
+  - **PDF Extraction**: Extracts and summarizes content from PDF documents
+  - **Text File Handling**: Processes plain text files
+  - **Web Summarization**: Summarizes content from web pages when given a URL
+
+## Setup and Deployment
+
+### Prerequisites
+
+- Slack Workspace with Admin privileges
+- OpenAI API Key
+- Railway account (or other platform for deployment)
+- GitHub account (for CI/CD)
+
+### Environment Variables
+
+- `SLACK_BOT_TOKEN`: Your Slack Bot User OAuth Token
+- `SLACK_SIGNING_SECRET`: Your Slack App Signing Secret
+- `OPENAI_API_KEY`: Your OpenAI API Key
+- `MAX_THREAD_HISTORY` (optional): Maximum number of messages to retrieve from a thread (default: 10)
+- `ALLOWED_CHANNEL` (optional): Channel ID where the bot is allowed to respond (if not set, bot works in all channels)
+
+### ⚠️ Security Warning
+
+**IMPORTANT**: Never commit your actual `.env` file or any file containing real API keys, tokens, or secrets to your repository. Only commit the `.env.example` file with placeholder values.
+
+- **API Tokens**: If you accidentally expose your API tokens, immediately rotate them (create new ones and invalidate the old ones) in the respective dashboards.
+- **Environment Variables**: Always use environment variables for sensitive information, especially in production.
+- **Git Practices**: Make sure `.env` is included in your `.gitignore` file to prevent accidental commits.
+
+### Installation
+
+1. **Create a Slack App**:
+   - Go to [api.slack.com/apps](https://api.slack.com/apps) and create a new app
+   - Add the following Bot Token Scopes:
+     - `app_mentions:read` - For reading when your bot is mentioned
+     - `channels:history` - For viewing messages in public channels where the bot is added
+     - `chat:write` - For sending messages as the bot
+     - `files:read` - For viewing files shared with the bot
+     - `files:write` - For uploading generated images to Slack
+   - Install the app to your workspace
+
+2. **Deploy the Bot**:
+   - Clone this repository
+   - Connect to Railway
+   - Set the required environment variables
+   - Deploy the application
+
+3. **Configure Slack Event Subscriptions**:
+   - Enable Events API
+   - Set the Request URL to your deployed app's URL + `/slack/events`
+   - Subscribe to the following bot events:
+     - `message.channels`
+     - `app_mention`
+
+## Deployment on Railway
+
+### Setting Up Railway
+
+1. Create a [Railway](https://railway.app/) account if you don't have one.
+2. Create a new project from your GitHub repository.
+3. Set up the required environment variables:
+   - In the Railway dashboard, go to your project
+   - Click on the "Variables" tab
+   - Add all the environment variables from your `.env.example` file:
+     - `SLACK_BOT_TOKEN`
+     - `SLACK_SIGNING_SECRET`
+     - `OPENAI_API_KEY`
+     - `MAX_THREAD_HISTORY` (optional)
+     - `ALLOWED_CHANNEL` (optional)
+     - `PORT` (Railway will set this automatically, but you can override it)
+4. Deploy your application:
+   - Railway will automatically deploy your application when you push to your repository
+   - You can also manually deploy from the Railway dashboard
+
+### Slack Configuration for Deployed Bot
+
+1. After deployment, Railway will provide you with a URL for your application
+2. Copy this URL and go to your Slack App's settings
+3. Under "Event Subscriptions", enable events and set the Request URL to:
+   ```
+   https://your-railway-app-url.railway.app/slack/events
+   ```
+4. Save changes and verify the URL
+
+### Testing Your Deployment
+
+1. Invite your bot to a channel in your Slack workspace
+2. Mention the bot with a message
+3. Check Railway logs if you encounter any issues
+
+## Usage
+
+### Basic Interaction
+
+Mention the bot with `@WDAI AI Bot` in any channel it's invited to, or send it a direct message.
+
+### Image Analysis
+
+Attach an image to your message to have the bot analyze it:
+```
+@WDAI AI Bot What's in this image?
+[image attachment]
+```
+
+### Image Generation
+
+Ask the bot to create images with DALL-E 3:
+```
+@WDAI AI Bot generate an image of a cat riding a bicycle
+```
+or
+```
+@WDAI AI Bot create a funny meme about programming
+```
+
+### CSV Analysis
+
+Attach a CSV file to have the bot analyze the data:
+```
+@WDAI AI Bot analyze this data please
+[CSV attachment]
+```
+
+### PDF Processing
+
+Share a PDF document for content extraction and summarization:
+```
+@WDAI AI Bot extract the key points from this document
+[PDF attachment]
+```
+
+### Web Page Summarization
+
+Ask the bot to summarize content from a webpage:
+```
+@WDAI AI Bot summarize this webpage: https://example.com/article
+```
+
+### Thread Conversations
+
+The bot maintains context in threads, so you can have a continuous conversation by replying in a thread.
+
+## Development
+
+### Technology Stack
+
+- **FastAPI**: Web framework
+- **Slack SDK**: For Slack API integration
+- **OpenAI API**: For AI capabilities
+- **DALL-E 3**: For image generation
+- **Railway**: Deployment platform
+
+### Local Development
+
+1. Clone the repository
+2. Install dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
+3. Set up environment variables (use a `.env` file for local development)
+4. Run the application:
+   ```
+   uvicorn app:app --reload
+   ```
+5. Use ngrok or a similar tool to create a public URL for testing with Slack
+
+### Requirements.txt
+
+```
+fastapi==0.110.0
+slack-sdk==3.27.1
+openai==1.64.0
+pydantic==2.10.6
+python-multipart==0.0.6
+requests==2.31.0
+uvicorn==0.29.0
+matplotlib
+pandas
+pillow
+```
+
+## Troubleshooting
+
+- **Bot not responding**: Check the application logs for errors
+- **File uploads not working**: Ensure the bot has the `files:read` permission
+- **Image generation fails**: Verify the bot has the `files:write` permission and check DALL-E API usage limits
+- **Error with OpenAI API**: Verify your API key and usage limits
+- **Bot responding in wrong channels**: Check if ALLOWED_CHANNEL is set correctly
+
+## Limitations
+
+- The bot can process files up to 25MB (Slack file size limit)
+- PDF analysis quality depends on the document's formatting and clarity
+- CSV parsing works best with well-formatted data
+- The bot may have slower response times when processing large files
+- Image generation follows OpenAI's content policy and may reject certain prompts
+
+## License
+
+MIT
