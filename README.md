@@ -273,6 +273,9 @@ If you want to run the bot on your local machine for testing or development:
 
    # Install dependencies using uv
    uv pip install -e .
+   
+   # For development, also install dev dependencies
+   uv sync --dev
    ```
 
 3. Set up environment variables:
@@ -294,11 +297,27 @@ If you want to run the bot on your local machine for testing or development:
 
 This project includes automatic code quality and security checks that run whenever new code is submitted. These checks:
 
-- Ensure the code follows standard formatting rules
+- Ensure the code follows standard formatting rules using [ruff](https://github.com/astral-sh/ruff)
+- Perform static type checking with [mypy](https://mypy.readthedocs.io/)
 - Scan for potential security issues
 - Verify all dependencies are safe to use
 
-This means you can be confident that the bot maintains high quality and security standards without needing to run technical tests yourself. This is enabled using Github actions. See python-checks.yml for more details.
+This means you can be confident that the bot maintains high quality and security standards without needing to run technical tests yourself. This is enabled using Github actions. See `.github/workflows/python-checks.yml` for more details.
+
+For local development, you can run these checks using:
+```bash
+# Install dev dependencies
+uv sync --dev
+
+# Run linting with ruff
+uv run ruff check run.py app/
+
+# Format code with ruff
+uv run ruff format run.py app/
+
+# Run type checking with mypy
+uv run mypy run.py app/
+```
 
 ### Dependencies
 
@@ -313,6 +332,13 @@ python-multipart
 requests
 slack-sdk
 uvicorn
+```
+
+Development dependencies include:
+```
+mypy
+ruff
+types-requests
 ```
 
 To add new dependencies, update the `pyproject.toml` file and run `uv pip install -e .` to regenerate the lock file.
