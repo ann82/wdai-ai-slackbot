@@ -2,6 +2,22 @@
 
 A Slack bot that uses OpenAI's GPT-4o model to respond to messages, analyze images, process CSV data, and extract information from PDFs.  Originally created for the purposes of enabling more AI experiments in-channel for our Women Defining AI micro-learning program participants, this repo is a templatized version of our Slackbot implementation that is open so that others can build their own AI Slackbot
 
+## 🚀 Getting Started (For Beginners)
+
+If you're new to coding or GitHub, this section will help you get started:
+
+1. **Fork this template**: Click the "Use this template" button at the top of this GitHub page to create your own copy of this repository.
+
+2. **Get your API credentials**: 
+   - Create a [Slack App](https://api.slack.com/apps) (Instructions in the "Create a Slack App" section below)
+   - Get an [OpenAI API key](https://platform.openai.com/api-keys)
+
+3. **Deploy your bot**: This template is set up for easy deployment on [Railway](https://railway.app/), a hosting platform that doesn't require technical expertise.
+
+4. **Test and enjoy**: Once deployed, invite your bot to a Slack channel and start interacting with it!
+
+Need more detailed instructions? Follow the step-by-step guides in the sections below.
+
 ## Features
 This template relies on OpenAI APIs for LLM capabiltiies, but you can continue to expand on these capabilities by integrating other LLM and providers for various features.
 - **AI-Powered Conversations**: Responds to messages using OpenAI's GPT-4o model
@@ -17,18 +33,27 @@ This template relies on OpenAI APIs for LLM capabiltiies, but you can continue t
 
 ### Prerequisites
 
-- Slack Workspace with Admin privileges
-- OpenAI API Key
-- Railway account (or other platform for deployment)
-- GitHub account (for CI/CD)
+- **Slack Workspace with Admin privileges**: You need admin access to a Slack workspace to create and install a bot. You can create a free Slack team for testing purposes if needed.
+- **OpenAI API Key**: Create an account at [OpenAI](https://platform.openai.com/) and generate an API key
+- **Railway account**: Sign up at [Railway](https://railway.app/) for deploying your bot (free tier available)
+- **GitHub account**: Required to fork this template and connect with Railway
 
 ### Environment Variables
 
-- `SLACK_BOT_TOKEN`: Your Slack Bot User OAuth Token
-- `SLACK_SIGNING_SECRET`: Your Slack App Signing Secret
+Environment variables are settings that need to be configured for your bot to work. You'll set these up in Railway during deployment:
+
+- `SLACK_BOT_TOKEN`: Your Slack Bot User OAuth Token (you'll get this when creating your Slack App)
+- `SLACK_SIGNING_SECRET`: Your Slack App Signing Secret (also provided when creating your Slack App)
 - `OPENAI_API_KEY`: Your OpenAI API Key
 - `MAX_THREAD_HISTORY` (optional): Maximum number of messages to retrieve from a thread (default: 10)
 - `ALLOWED_CHANNEL` (optional): Channel ID where the bot is allowed to respond (if not set, bot works in all channels)
+- `LOG_DIR` (optional): Directory where logs will be stored (default: `logs`)
+- `LOG_LEVEL` (optional): Minimum log level to record (default: `INFO`)
+- `RATE_LIMIT_ENABLED` (optional): Enable or disable rate limiting (default: `true`)
+- `USER_RATE_LIMIT_WINDOW` (optional): Time window in seconds for user rate limiting (default: `60`)
+- `USER_RATE_LIMIT_MAX` (optional): Maximum number of requests per user in the window (default: `10`)
+- `TEAM_RATE_LIMIT_WINDOW` (optional): Time window in seconds for team rate limiting (default: `60`)
+- `TEAM_RATE_LIMIT_MAX` (optional): Maximum number of requests per team in the window (default: `100`)
 
 ### ⚠️ Security Warning
 
@@ -77,28 +102,44 @@ The bot also includes an automatic cleanup process to prevent memory growth from
 
 ### Installation
 
-1. **Create a Slack App**:
-   - Go to [api.slack.com/apps](https://api.slack.com/apps) and create a new app
-   - Add the following Bot Token Scopes:
+#### 1. **Create a Slack App**:
+   - Go to [api.slack.com/apps](https://api.slack.com/apps) and click "Create New App"
+   - Choose "From scratch" and give your app a name and select your workspace
+   - In the left sidebar, under "Features", click on "OAuth & Permissions"
+   - Scroll down to "Scopes" and add the following Bot Token Scopes:
      - `app_mentions:read` - For reading when your bot is mentioned
      - `channels:history` - For viewing messages in public channels where the bot is added
      - `chat:write` - For sending messages as the bot
      - `files:read` - For viewing files shared with the bot
      - `files:write` - For uploading generated images to Slack
-   - Install the app to your workspace
+   - Scroll up and click "Install to Workspace"
+   - After installation, you'll see a "Bot User OAuth Token" - copy this for later (this is your `SLACK_BOT_TOKEN`)
+   - In the left sidebar, go to "Basic Information" and scroll down to "App Credentials"
+   - Copy the "Signing Secret" for later (this is your `SLACK_SIGNING_SECRET`)
 
-2. **Deploy the Bot**:
-   - Clone this repository
-   - Connect to Railway
-   - Set the required environment variables
-   - Deploy the application
+#### 2. **Deploy the Bot**:
+   - Use this repository as a template by clicking the "Use this template" button
+   - Name your new repository and create it
+   - Sign up or log in to [Railway](https://railway.app/)
+   - From the Railway dashboard, click "New Project" and select "Deploy from GitHub repo"
+   - Connect your GitHub account if prompted and select your repository
+   - Click "Deploy Now"
+   - Once the deployment is initiated, click on "Variables" in the left sidebar
+   - Add the environment variables mentioned above, particularly:
+     - `SLACK_BOT_TOKEN`: The Bot User OAuth Token you copied
+     - `SLACK_SIGNING_SECRET`: The Signing Secret you copied
+     - `OPENAI_API_KEY`: Your OpenAI API key
 
-3. **Configure Slack Event Subscriptions**:
-   - Enable Events API
-   - Set the Request URL to your deployed app's URL + `/slack/events`
-   - Subscribe to the following bot events:
+#### 3. **Configure Slack Event Subscriptions**:
+   - After Railway deploys your bot, it will provide a URL (find it in the "Settings" tab)
+   - Go back to your Slack App configuration
+   - In the left sidebar, click on "Event Subscriptions" and toggle "Enable Events" to On
+   - Enter your Request URL: `https://your-railway-app-url.railway.app/slack/events`
+   - Under "Subscribe to bot events", click "Add Bot User Event" and add:
      - `message.channels`
      - `app_mention`
+   - Click "Save Changes" at the bottom
+   - In the left sidebar, click on "App Home" and check "Allow users to send Slash commands and messages from the messages tab"
 
 ## Deployment on Railway
 
@@ -115,10 +156,17 @@ The bot also includes an automatic cleanup process to prevent memory growth from
      - `OPENAI_API_KEY`
      - `MAX_THREAD_HISTORY` (optional)
      - `ALLOWED_CHANNEL` (optional)
+     - `LOG_DIR` (optional)
+     - `LOG_LEVEL` (optional)
+     - `RATE_LIMIT_ENABLED` (optional)
+     - `USER_RATE_LIMIT_WINDOW` (optional)
+     - `USER_RATE_LIMIT_MAX` (optional)
+     - `TEAM_RATE_LIMIT_WINDOW` (optional)
+     - `TEAM_RATE_LIMIT_MAX` (optional)
      - `PORT` (Railway will set this automatically, but you can override it)
 4. Deploy your application:
    - Railway will automatically deploy your application when you push to your repository
-   - You can also manually deploy from the Railway dashboard
+   - You can also manually deploy from the Railway dashboard by clicking "Deploy" button
 
 ### Network Access Requirements
 
@@ -131,18 +179,27 @@ If you're experiencing issues with these features, check your deployment platfor
 ### Slack Configuration for Deployed Bot
 
 1. After deployment, Railway will provide you with a URL for your application
-2. Copy this URL and go to your Slack App's settings
-3. Under "Event Subscriptions", enable events and set the Request URL to:
+   - Find this under the "Settings" tab in your Railway project
+   - Copy the URL (it will look like `https://your-app-name.railway.app`)
+2. Copy this URL and go to your Slack App's settings at [api.slack.com/apps](https://api.slack.com/apps)
+3. Select your app and then under "Event Subscriptions", enable events and set the Request URL to:
    ```
    https://your-railway-app-url.railway.app/slack/events
    ```
-4. Save changes and verify the URL
+4. Save changes and verify the URL (Slack will check if your application is responding correctly)
 
 ### Testing Your Deployment
 
-1. Invite your bot to a channel in your Slack workspace
-2. Mention the bot with a message
-3. Check Railway logs if you encounter any issues
+1. Invite your bot to a channel in your Slack workspace:
+   - In Slack, go to the channel where you want to add the bot
+   - Type `/invite @YourBotName`
+2. Mention the bot with a message:
+   - Type `@YourBotName Hello!` and send the message
+3. If the bot doesn't respond, check Railway logs:
+   - Go to your Railway dashboard
+   - Click on your project
+   - Click on "Logs" in the left sidebar
+   - Look for any error messages that might explain the issue
 
 ## Usage
 
@@ -201,21 +258,37 @@ The bot maintains context in threads, so you can have a continuous conversation 
 
 ### Local Development
 
-1. Clone the repository
+If you want to run the bot on your local machine for testing or development:
+
+1. Clone the repository to your computer:
+   ```
+   git clone https://github.com/your-username/your-repo-name.git
+   cd your-repo-name
+   ```
+
 2. Install dependencies:
    ```
    # Install uv if you don't have it yet
    curl -LsSf https://astral.sh/uv/install.sh | sh
 
    # Install dependencies using uv
-   uv pip sync
+   uv pip install -e .
    ```
-3. Set up environment variables (use a `.env` file for local development)
+
+3. Set up environment variables:
+   - Create a file named `.env` in the root directory
+   - Copy the contents from `.env.example` into `.env`
+   - Fill in your actual API keys and tokens
+
 4. Run the application:
    ```
    uvicorn app:app --reload
    ```
-5. Use ngrok or a similar tool to create a public URL for testing with Slack
+
+5. To test with Slack, you'll need to expose your local server to the internet:
+   - Install [ngrok](https://ngrok.com/) (a tool to create a tunnel to your local server)
+   - Run ngrok: `ngrok http 8000`
+   - Use the ngrok URL (looks like `https://something.ngrok.io`) in your Slack App's Event Subscriptions URL
 
 ### Automated Quality Checks
 
@@ -229,20 +302,45 @@ This means you can be confident that the bot maintains high quality and security
 
 ### Dependencies
 
-Dependencies are managed using pyproject.toml. The project requires Python 3.13+ and includes the following main packages:
+Dependencies are managed using `pyproject.toml` and `uv.lock`. The project uses [uv](https://github.com/astral-sh/uv), a fast Python package installer and resolver. It requires Python 3.13+ and includes the following main packages:
 
 ```
 fastapi
-slack-sdk
 openai
+pillow
 pydantic
 python-multipart
 requests
+slack-sdk
 uvicorn
-matplotlib
-pandas
-pillow
 ```
+
+To add new dependencies, update the `pyproject.toml` file and run `uv pip install -e .` to regenerate the lock file.
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Bot doesn't respond in Slack**
+   - Check if your bot is invited to the channel
+   - Verify that your Railway application is running (check Railway dashboard)
+   - Check the Railway logs for errors
+   - Make sure your Event Subscriptions URL is verified in Slack
+
+2. **Image generation or file processing doesn't work**
+   - Check if you have proper API keys set up
+   - Verify that the bot has the correct permissions in Slack
+
+3. **Deployment fails on Railway**
+   - Check that all required environment variables are set
+   - Look at the deployment logs for specific error messages
+
+### Getting Help
+
+If you're experiencing issues not covered here:
+- Check the Railway documentation: [docs.railway.app](https://docs.railway.app/)
+- Visit the Slack API documentation: [api.slack.com](https://api.slack.com/)
+- Check OpenAI's documentation: [platform.openai.com/docs](https://platform.openai.com/docs)
 
 ## Limitations
 
