@@ -4,8 +4,6 @@ import io
 import os
 import time
 import requests
-import matplotlib.pyplot as plt
-import pandas as pd
 from PIL import Image
 from typing import Dict, Any, Optional, Tuple, List
 
@@ -171,36 +169,3 @@ def download_image(url: str) -> Optional[bytes]:
         logger.error(f"Error downloading image: {e}")
         return None
 
-
-def generate_chart_from_csv(csv_data: bytes, chart_type: str = "bar") -> Optional[str]:
-    """Generate a chart from CSV data."""
-    try:
-        # Parse CSV data
-        df = pd.read_csv(io.StringIO(csv_data.decode('utf-8')))
-        
-        # Create a simple chart
-        plt.figure(figsize=(10, 6))
-        
-        if chart_type == "bar":
-            df.plot(kind='bar')
-        elif chart_type == "line":
-            df.plot(kind='line')
-        elif chart_type == "pie" and len(df.columns) >= 2:
-            df.plot(kind='pie', y=df.columns[1], labels=df[df.columns[0]])
-        else:
-            df.plot()
-            
-        plt.tight_layout()
-        
-        # Save to buffer
-        buffer = io.BytesIO()
-        plt.savefig(buffer, format='png')
-        buffer.seek(0)
-        
-        # Convert to base64
-        image_base64 = base64.b64encode(buffer.read()).decode('utf-8')
-        
-        return f"data:image/png;base64,{image_base64}"
-    except Exception as e:
-        logger.error(f"Error generating chart: {e}")
-        return None
