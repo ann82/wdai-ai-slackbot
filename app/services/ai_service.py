@@ -2,6 +2,8 @@ import os
 import tempfile
 from typing import List, Dict, Any, Optional
 import requests
+import logging
+# Remoe this later
 
 from app.config import (
     logger,
